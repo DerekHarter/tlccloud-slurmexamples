@@ -2,7 +2,7 @@
 #SBATCH --partition=debug
 #SBATCH --job-name=myjob
 #SBATCH --mem=1G
-#SBATCH --time=1-0:0
+#SBATCH --time=1:0
 #SBATCH --output=myjob.slurm.log
 hostname
 date
