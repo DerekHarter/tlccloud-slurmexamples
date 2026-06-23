@@ -9,7 +9,7 @@ echo "Compute node: `hostname`"
 echo "Project directory: `pwd`"
 echo "Start time: `date`"
 start=$(date +%s)
-source activate keras-tf-gpu
+conda activate keras-tf-gpu
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 ./gputest.py
 echo "End time: `date`"

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from timeit import default_timer as timer
 
-# define dataset globall to use for performance tests
+# define dataset globally to use for performance tests
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -21,7 +21,8 @@ def test_cpu_performance():
     print('test_cpu_performance: testing using only device /CPU:0')
     with tf.device('/CPU:0'):
         model_cpu_base = tf.keras.models.Sequential([
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.layers.Input(shape=(28, 28)),
+            tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(1024, activation='relu'),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(10)
@@ -50,7 +51,8 @@ def test_gpu_performance():
     print('test_gpu_performance: testing using single gpu device /GPU:0')
     with tf.device('/GPU:0'):
         model_gpu_base = tf.keras.models.Sequential([
-            tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.layers.Input(shape=(28, 28)),
+            tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(1024, activation='relu'),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(10)

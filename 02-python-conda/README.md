@@ -12,8 +12,8 @@ as follows to create an environment and install packages we need.
 First if you have not yet used conda, you have to initilize your account to setup for conda usage:
 
 ```
-$ conda init
-$ conda config --append channels conda-forge
+conda init
+conda config --append channels conda-forge
 ```
 
 You may need to log out of your shell/terminal session and log back in to pick up changes from the conda
@@ -24,10 +24,16 @@ libraries.  The `conda-forge` channel often has more recent versions of scientif
 find I often need it.  This initialization only needs to be done once, though you can append additional channels whenever
 needed.  The init will create a default `base` environment that you can use, which only has basic python packages in it.
 
-You can create an environment named `keras-tf-gpu` with `keras`, `tensorflow` and the `tensorflow-gpu` package as follows:
+You can create an environment named `keras-tf-gpu` with `keras` and `tensorflow`package as follows:
+
+NOTE: if you want gpu support enabled for `tensorflow` use the `tensorflow[and-cuda]` package.  Also you need to actually
+be logged into the `gpu-1-01` or suitable node that has the nvidia and cuda packages available, so that the conda environemnt will be
+created and setup correctly to use cuda tools to access the gpu from tensorflow.
+
 
 ```
-$ conda create -n keras-tf-gpu keras tensorflow tensorflow-gpu
+ssh gpu-1-01
+conda create -n keras-tf-gpu keras tensorflow[and-cuda]
 ```
 
 Once successfully created, you can activate the environment with the installed packages like this:
@@ -40,11 +46,12 @@ Once successfully created, you can activate the environment with the installed p
 Notice that we were in the base (default) environment before activating the new `keras-tf-gpu` environment here.
 
 If you forgot to install a package, or need to add or remove packages from an existing environment, you can always
-do this as needed.  For example, if I decide I also need `scikit-learn` machine learning pakcages in this environment
-I can install them.  The `conda install` command will install or manage packages for the current active environment:
+do this as needed.  For example, if you decide you also need `scikit-learn` machine learning pakcages in this environment
+you can install them in your current environment.  The `conda install` command will install or manage
+packages for the current active environment:
 
 ```
-(keras-tf-gpu) $ conda install scikit-learn
+conda install scikit-learn
 ```
 
 ## Example slurm Batch Job Submission with Python and Conda
@@ -81,7 +88,7 @@ script allocates a single cpu and gpu on some available node to run.  Notice tha
 source activate keras-tf-gpu
 ```
 
-in the script before calling the actual python code to activate the needed environment.  You use
+in the script before executing the actual python script to activate the needed conda environment.  You use
 `conda activate` to activate an environment by hand at the terminal but `source activate` inside
 of a batch script (for reasons that are unimportant).
 
