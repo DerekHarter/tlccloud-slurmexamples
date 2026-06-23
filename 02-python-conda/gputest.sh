@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=gputest
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=3G
 #SBATCH --output=gputest-%5A.out
 #SBATCH --gpus=1

@@ -48,7 +48,7 @@ Notice that we were in the base (default) environment before activating the new 
 If you forgot to install a package, or need to add or remove packages from an existing environment, you can always
 do this as needed.  For example, if you decide you also need `numpy` `scikit-learn` `pandas` and `matplotlib`
 pakcages in this environment you can install them in your currently active environment. (The script we run
-next needs these, so you do need to install these in the active environment).)
+next needs these, so you do need to install these in the active environment).
 The `conda install` command will install or manage packages for the current active environment:
 
 ```
