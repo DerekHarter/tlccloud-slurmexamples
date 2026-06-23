@@ -46,20 +46,21 @@ Once successfully created, you can activate the environment with the installed p
 Notice that we were in the base (default) environment before activating the new `keras-tf-gpu` environment here.
 
 If you forgot to install a package, or need to add or remove packages from an existing environment, you can always
-do this as needed.  For example, if you decide you also need `scikit-learn` machine learning pakcages in this environment
-you can install them in your current environment.  The `conda install` command will install or manage
-packages for the current active environment:
+do this as needed.  For example, if you decide you also need `numpy` `scikit-learn` `pandas` and `matplotlib`
+pakcages in this environment you can install them in your currently active environment. (The script we run
+next needs these, so you do need to install these in the active environment).)
+The `conda install` command will install or manage packages for the current active environment:
 
 ```
-conda install scikit-learn
+conda install numpy scikit-learn pandas matplotlib
 ```
 
 ## Example slurm Batch Job Submission with Python and Conda
 
-We can create a slurm script that activates a conda/python environment and runs a python program.  For
-example, given the following slurm batch script called `gputest.sh`:
+We can create a slurm bash script that activates a conda/python environment and runs a python program.  For
+example, look at the following slurm batch script called `gputest.sh`:
 
-```
+```bash
 #!/bin/bash
 #SBATCH --job-name=gputest
 #SBATCH --ntasks=1
@@ -67,13 +68,38 @@ example, given the following slurm batch script called `gputest.sh`:
 #SBATCH --mem=3G
 #SBATCH --output=gputest-%5A.out
 #SBATCH --gpus=1
+
+# Display node and directory that was assigned and that we are running the job from.
 echo "Compute node: `hostname`"
 echo "Project directory: `pwd`"
+
+# Setup conda profile and ensure we are using the correct conda environment
+# for the following computation.
+# Note: you may need to adjust the path to the conda profile shell script and
+# the name of the conda environment you wish to activate here.
+. /home/miniconda3/etc/profile.d/conda.sh
+conda activate keras-tf-gpu
+echo "PATH: $PATH"
+echo "python path: `which python`"
+echo "conda path: `which conda`"
+echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
+echo "--------------------------------------------------"
+echo ""
+
+# Can setup other needed configuration such as environment variable
+# settings that may be needed by the computation.
+# For example, reduce tensorflow warning log level as these warning
+# are not really useful.
+export TF_CPP_MIN_LOG_LEVEL=3
+
+# Record start time to display elapsed time of computation
 echo "Start time: `date`"
 start=$(date +%s)
-source activate keras-tf-gpu
-echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
-./gputest.py
+
+# Run the actual computation by invoking python script or executable
+python gputest.py
+
+# Record end time to display elapsed time of computation
 echo "End time: `date`"
 end=$(date +%s)
 secs=($end-$start)
@@ -85,16 +111,25 @@ We talk in more detail about allocating gpu and other resources later in this tu
 script allocates a single cpu and gpu on some available node to run.  Notice that we use
 
 ```
-source activate keras-tf-gpu
+conda activate keras-tf-gpu
 ```
 
-in the script before executing the actual python script to activate the needed conda environment.  You use
-`conda activate` to activate an environment by hand at the terminal but `source activate` inside
-of a batch script (for reasons that are unimportant).
+in the script before executing the actual python script to activate the needed conda environment.
+Just above activating our conda environment, we setup and initialize the conda system.  This setup
+is normally done in your `.bashrc` file each time you log into the slurm system, but by default your
+bashrc is not loaded when slurm batch jobs are run like this, so we need to initialize conda by hand
+before we can activate an environment.  Also as noted in the comments, your environment name and
+the location of the conda initialization may change.  If you are creating and managing your own conda
+environment, you will want to set the name of the environment here appropriately.
+
+Also notice that after we initialize the conda environment, we display some information like path to the
+conda and python executables.  This is a good practice to ensure that you are correctly using the correct
+environment you setup for the scripts you run on the slurm cluster.
 
 The file `gputest.py` can contain any Python code/script needed, and since we activate the
 `keras-tf-gpu` environment before calling it, it will have available the `keras`, `tensorflow`
-and any other libraries installed in that environment.
+and any other libraries installed in that environment.  As mentioned this script also uses `numpy`
+`pandas` and `matplotlib`, so those packages need to be installed in the active conda environment.
 
 The `gputest.py` file given as an example in this tutorial directory simply trains
 a small neural network using `keras/tensorflow` and using the allocated gpu it was given
@@ -106,7 +141,25 @@ To run this example/test job on the slurm batching system, we would invoke it as
 $ sbatch gputest.sh
 ```
 
+If the jobs starts successfully running, you should see that it is now active on a slurm partiton.  For
+example use the `squeue` command to see which jobs are currently in the slurm partition queues:
+
+```
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+                40     debug  gputest      slu  R       0:02      1 gpu-1-01
+```
+
+This shows that the job is currently running on the debug partition queue.  It was assigned a job id of 40, and
+it was allocated some resources on the `gpu-1-01` machine.
+
+While running, output from the script will be put into a file named `gputest-XXXXX.out`, where `XXXXX` will
+be replaced by the slurm job batch number that was assigned to your job when it was placed onto the slurm
+queue, e.g. `gputest-00040.out`.  You should look at this file during or after running this test.  You will see that
+the correct conda environment was activated, and that the job is actually executing on the assigned node, like `gpu-1-01`,
+that has a gpu resource that was allocated for the job to use while running.
+
 ## Additional Resources
 
 - [Conda User Guide: Managing Environments](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
-- [How to run python experiments with Slurm and Conda](Python and Conda Environments in Slurm Jobs)
+- [How to run python experiments with Slurm and Conda](https://hiteshuv.medium.com/how-to-run-python-experiments-with-slurm-and-conda-fcd6f2f31840)
