@@ -38,7 +38,7 @@ def test_cpu_performance():
                               metrics=['accuracy'])
 
             start = timer()
-            model_cpu.fit(x_train[:10000], y_train[:10000], epochs=5, verbose=2)
+            model_cpu.fit(x_train, y_train, epochs=5, verbose=2)
             end = timer()
             
             print('cpu elapsed time: ', end - start)
