@@ -43,6 +43,7 @@ mkdir -p ${DATA_DIR}
 echo "NB_WORKERS: $NB_WORKERS"
 echo "SLURM_NTASKS: $SLURM_NTASKS"
 echo "LOG_DIR: $LOG_DIR"
+echo "DATA_DIR: $DATA_DIR"
 echo "--------------------------------------------------"
 echo ""
 
@@ -57,7 +58,7 @@ sleep 10
 echo ""
 
 # srun: runs ipengine on each available core -- controller location first node
-echo "Launching engine hostname: $(hostname) NB_WORKERS: $NB_WORKERS SLURM_CPUS_PER_TASK: $SLURM_CPUS_PER_TASK profile: $profile"
+echo "Launching worker engines hostname: $(hostname) NB_WORKERS: $NB_WORKERS SLURM_CPUS_PER_TASK: $SLURM_CPUS_PER_TASK profile: $profile"
 srun --output=${LOG_DIR}/ipengine-%j-workers.out --ntasks=${NB_WORKERS} --cpus-per-task=${SLURM_CPUS_PER_TASK} ipengine --profile=${profile} --location=$(hostname) &
 sleep 25
 echo ""

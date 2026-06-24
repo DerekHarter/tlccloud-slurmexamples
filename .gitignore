@@ -1,0 +1,8 @@
+# use data and logs subdirectories for generate data and logs,
+# so ignore those directories in this project.
+**/data/*
+**/logs/*
+*.log
+*.out
+
+**/__pycache__/*
