@@ -196,6 +196,37 @@ slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ sbatch slurm_parallel_l
 
 ## Execution of a Taskfile with Parameters
 
+As a second example, the launcher script can also accept a task file, where each line is expected to be
+a command that should be run.  To use the launcher script this way, you should not specify the
+number of tasks using the `--ntasks` flag.  The number of tasks run in parallel will come from the
+number of tasks described on each line of the provided taskfile.
+
+In this example we recreate performing a `scikit-learn` meta parameter search for k-means clustering,
+the same task used in example 4 using an `ipyparallel` clustering.  This example is a bit
+limited compared to that one, as it can only be run on a single node.  But it may be a bit simpler
+to set up, and works well in a slurm system that has powerful single nodes with many cpus that you
+would like to completely allocate for some time period to perform some embarrassingly parallel
+calculation with.
+
+A file named `taskfile.txt` has already been created, and there is a data file saved in
+`data/blobs.csv`.  The taskfile and generated data were created by running the `setup_tasks.py`
+function.
+
+```
+(keras-tf-gpu) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ python unsupervised/setup_tasks.py 
+generate the data to perform parameter search on for this example...
+random number of centers we used when generating data:  5
+save dataset to file 'data/blobs.csv' to be used in parallel example
+create the taskfile to be given to the GNU parallel launcher
+```
+
+You would do this to generate an appropriate `taskfile.txt` with one task invocation per line
+before perform the GNU `parallel` batch job.
+
+To execute from a taskfile set of tasks, invoke the launcher like this:
+
+```
+```
 
 
 ## Using GNU `parallel` Across Multiple Nodes

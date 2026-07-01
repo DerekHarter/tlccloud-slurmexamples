@@ -17,15 +17,13 @@ ulimit -u 10000
 
 echo "Node: ${SLURM_NODELIST}"
 echo "Executing ${SLURM_NTASKS} independant tasks at the same time"
-export TIMESTAMP=$(date +"%Y%m%dT%H%M%S")
-
 
 # the --exclusive to srun makes srun use distinct CPUs for each job step
 # -N1 -n1 single task with ${SLURM_CPUS_PER_TASK} cores
 SRUN="srun  --exclusive -n1 -c ${SLURM_CPUS_PER_TASK:=1} --cpu-bind=cores"
 
 HOSTNAME=$(hostname)
-LOGS="logs.${TIMESTAMP}"
+LOGS="logs/job_${SLURM_JOBID}"
 RESUME=""
 TASKFILE=""
 NTASKS=""
@@ -70,11 +68,18 @@ PARALLEL="parallel --delay 0.2 -j ${SLURM_NTASKS} --joblog ${TASKFILE_MAINLOG} $
 echo "Create logs directory if not existing"
 mkdir -p ${LOGS_DIR}
 
+# NOTE: the if part here handles when a file of separate commands to run is passed in
+# we currently add a task number using awk as parallel parameter {1} and we have hardcoded
+# the example to expect 4 comma separated parameters in the file
+# python, script to run, datafile, n_clusters.  
+# If there are more or less parameters this would have to be adjusted.
 if [[ -z ${NTASKS} ]];then
     cat ${TASKFILE} |                                      \
     awk -v NNODE="$SLURM_NNODES" -v NODEID="$SLURM_NODEID" \
-    'NR % NNODE == NODEID' |                               \
-    ${PARALLEL} "${SRUN} {1} > ${LOGS_DIR}/$(basename ${TASKFILE}).log.{%}"
+    'NR % NNODE == NODEID {printf "%d,%s\n", NR, $0}' |                               \
+    ${PARALLEL} --colsep '\,' "${SRUN} {2} {3} {4} {5} > ${LOGS_DIR}/$(basename ${TASKFILE}).log.{1}"
+# The else part handles when --ntasks is specified and we are simply executing the same 
+# task NTASKS number of times
 else
     echo  "$(seq 1 ${NTASKS})" |                             \
     awk -v NNODE="$SLURM_NNODES" -v NODEID="$SLURM_NODEID" \
