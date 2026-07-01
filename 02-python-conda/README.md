@@ -48,12 +48,35 @@ Notice that we were in the base (default) environment before activating the new 
 If you forgot to install a package, or need to add or remove packages from an existing environment, you can always
 do this as needed.  For example, if you decide you also need `numpy` `scikit-learn` `pandas` and `matplotlib`
 pakcages in this environment you can install them in your currently active environment. (The script we run
-next needs these, so you do need to install these in the active environment).
+next needs these, so you do need to install these in the active environment).)
 The `conda install` command will install or manage packages for the current active environment:
 
 ```
 conda install numpy scikit-learn pandas matplotlib
 ```
+
+Once you have an environment set up, it is often a good idea to check that the packages
+are installed and available for use when your environment is active.  For example, there is
+a python script called `versions.py` which you can run to test that all of the packages we need
+are available, as well as seeing which computing devices are visible to tensorflow.  Run it like
+this:
+
+```
+$ python versions.py
+Python version    :  3.13.14 | packaged by Anaconda, Inc. | (main, Jun 17 2026, 20:12:46) [GCC 14.3.0]
+numpy version     :  2.4.6
+scikit-learn  vers:  1.9.0
+matplotlib version:  3.10.9
+pandas version    :  3.0.3
+tensorflow version:  2.21.0
+Physical Devices  :  [PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU')]
+Available Devices :  [LogicalDevice(name='/device:CPU:0', device_type='CPU')]
+
+```
+
+Notice that only a CPU device was shown as available on this node.  We ran this command on a node
+without any gpu devices.  If you were to run the command on a node that has GPU devices, you should
+also see those as available devices in addition to having CPU available for compute.
 
 ## Example slurm Batch Job Submission with Python and Conda
 
