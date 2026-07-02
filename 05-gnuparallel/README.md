@@ -26,7 +26,7 @@ interactive `srun` sessions first to create and setup your tools.  We are going 
 and compile the `stress-ng` tool to use in our first example.  Start by requesting an interactive
 session on a compute node.
 
-```
+```bash
 slu@slurm:~/repos$ srun --pty bash
 slu@cpu-1-01:~/repos$ 
 ```
@@ -37,7 +37,7 @@ allocated some different node.
 Once on a worker node we can set up our tooling.  Perform the following to clone the `stress-ng`
 code, build the tool, and add it into our own local `bin` directory for use in parallel jobs:
 
-```
+```bash
 slu@cpu-1-01:~/repos$ git clone https://github.com/ColinIanKing/stress-ng
 Cloning into 'stress-ng'...
 ...
@@ -105,7 +105,7 @@ times, which is 300 times in this example.
 
 Submit the job using the following `sbatch` command:
 
-```
+```bash
 slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ sbatch slurm_parallel_launcher_single_node.sh --ntasks 300 "./task.sh"
 Submitted batch job 103
 slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ squeue
@@ -120,7 +120,7 @@ node.
 You can join the allocation while it is running to, for example, monitor the cpu usage on the node
 using something like the `htop` command:
 
-```
+```bash
 slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ srun --jobid 103 --overlap -w cpu-1-01 --pty bash -i
 (base) slu@cpu-1-01:~/repos/tlccloud-slurmexamples/05-gnuparallel$ 
 
@@ -135,7 +135,7 @@ You could use `htop` to for example see the current cpu and resource utilization
 allocated and are now running on.  You might notice that 8 cpu cores are usually being shown as being utilized
 in `htop`, corresponding to the `--ntasks-per-node` we have set in the launcher script.
 
-```
+```bash
 (base) slu@cpu-1-01:~/repos/tlccloud-slurmexamples/05-gnuparallel$ htop
 ```
 
@@ -165,7 +165,7 @@ logs.20260701T112715/
 The `task.log` file here in particular records the status of each attempted job that parallel executes, including
 the exit status code of the jobs.
 
-```
+```bash
 slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ cat logs.20260701T112715/task.log
 Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
 1	:	1782923235.417	    60.155	0	0	0	0	srun  --exclusive -n1 -c 1 --cpu-bind=cores ./task.sh > /home/slu/repos/tlccloud-slurmexamples/05-gnuparallel/logs.20260701T112715/task.sh.log.1
@@ -189,7 +189,7 @@ rerun and complete any failed or unfinished jobs.  For example you you underesti
 your job is stopped early on the cluster, you can restart it using this method to get another allocation and complete
 any unfinished jobs.
 
-```
+```bash
 slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ sbatch slurm_parallel_launcher_single_node.sh --ntasks 300 -r "logs.20260701T112715" "./task.sh"
 
 ```
@@ -212,7 +212,7 @@ A file named `taskfile.txt` has already been created, and there is a data file s
 `data/blobs.csv`.  The taskfile and generated data were created by running the `setup_tasks.py`
 function.
 
-```
+```bash
 (keras-tf-gpu) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ python unsupervised/setup_tasks.py 
 generate the data to perform parameter search on for this example...
 random number of centers we used when generating data:  5
@@ -225,8 +225,111 @@ before perform the GNU `parallel` batch job.
 
 To execute from a taskfile set of tasks, invoke the launcher like this:
 
+```bash
+(keras-tf-gpu) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ sbatch slurm_parallel_launcher_single_node.sh taskfile.txt
+Submitted batch job 135
+(keras-tf-gpu) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ squeue
+             JOBID PARTITION     NAME     USER    STATE       TIME  NODES     CPUS MIN_MEMO TIME_LEF NODELIST(REASON)
+               135       cpu slurm_pa      slu  RUNNING       0:02      1       16        0  1:59:58 cpu-1-01
 ```
+
+In the example, the `testfile.txt` file has the following structure:
+
+```bash
+(base) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ cat taskfile.txt 
+python,unsupervised/some_funcs.py,data/blobs.csv,2
+python,unsupervised/some_funcs.py,data/blobs.csv,3
+python,unsupervised/some_funcs.py,data/blobs.csv,4
+python,unsupervised/some_funcs.py,data/blobs.csv,5
+python,unsupervised/some_funcs.py,data/blobs.csv,6
+python,unsupervised/some_funcs.py,data/blobs.csv,7
+python,unsupervised/some_funcs.py,data/blobs.csv,8
+python,unsupervised/some_funcs.py,data/blobs.csv,9
+python,unsupervised/some_funcs.py,data/blobs.csv,10
+python,unsupervised/some_funcs.py,data/blobs.csv,11
+python,unsupervised/some_funcs.py,data/blobs.csv,12
+python,unsupervised/some_funcs.py,data/blobs.csv,13
+python,unsupervised/some_funcs.py,data/blobs.csv,14
+python,unsupervised/some_funcs.py,data/blobs.csv,15
+python,unsupervised/some_funcs.py,data/blobs.csv,16
+python,unsupervised/some_funcs.py,data/blobs.csv,17
+python,unsupervised/some_funcs.py,data/blobs.csv,18
+python,unsupervised/some_funcs.py,data/blobs.csv,19
+python,unsupervised/some_funcs.py,data/blobs.csv,20
+python,unsupervised/some_funcs.py,data/blobs.csv,21
+python,unsupervised/some_funcs.py,data/blobs.csv,22
+python,unsupervised/some_funcs.py,data/blobs.csv,23
+python,unsupervised/some_funcs.py,data/blobs.csv,24
+python,unsupervised/some_funcs.py,data/blobs.csv,25
+python,unsupervised/some_funcs.py,data/blobs.csv,26
+python,unsupervised/some_funcs.py,data/blobs.csv,27
+python,unsupervised/some_funcs.py,data/blobs.csv,28
+python,unsupervised/some_funcs.py,data/blobs.csv,29
+python,unsupervised/some_funcs.py,data/blobs.csv,30
+python,unsupervised/some_funcs.py,data/blobs.csv,31
+python,unsupervised/some_funcs.py,data/blobs.csv,32
+python,unsupervised/some_funcs.py,data/blobs.csv,33
+python,unsupervised/some_funcs.py,data/blobs.csv,34
+python,unsupervised/some_funcs.py,data/blobs.csv,35
+python,unsupervised/some_funcs.py,data/blobs.csv,36
+python,unsupervised/some_funcs.py,data/blobs.csv,37
+python,unsupervised/some_funcs.py,data/blobs.csv,38
+python,unsupervised/some_funcs.py,data/blobs.csv,39
+python,unsupervised/some_funcs.py,data/blobs.csv,40
 ```
+
+There are 4 comma separated parameters, where the first one is actually the python interpreter
+we want to invoke on the other parameters in this task.  This will be resolved by the launcher 
+script as a set of 39 srun commands, looking like:
+
+```bash
+(keras-tf-gpu) slu@slurm:~/repos/tlccloud-slurmexamples/05-gnuparallel$ cat logs/job_135/taskfile.txt
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+4	:	1782938284.340	     8.027	0	0	0	0	srun  --exclusive -n1 -c 1 --cpu-bind=cores python unsupervised/some_funcs.py data/blobs.csv 5 > /home/slu/repos/tlccloud-slurmexamples/05-gnuparallel/logs/job_135/taskfile.txt.log.4
+5	:	1782938284.543	     8.332	0	0	0	0	srun  --exclusive -n1 -c 1 --cpu-bind=cores python unsupervised/some_funcs.py data/blobs.csv 6 > /home/slu/repos/tlccloud-slurmexamples/05-gnuparallel/logs/job_135/taskfile.txt.log.5
+6	:	1782938284.752	     9.574	0	0	0	0	srun  --exclusive -n1 -c 1 --cpu-bind=cores python unsupervised/some_funcs.py data/blobs.csv 7 > /home/slu/repos/tlccloud-slurmexamples/05-gnuparallel/logs/job_135/taskfile.txt.log.6
+8	:	1782938285.159	     9.199	0	0	0	0	srun  --exclusive -n1 -c 1 --cpu-bind=cores python unsupervised/some_funcs.py data/blobs.csv 9 > /home/slu/repos/tlccloud-slurmexamples/05-gnuparallel/logs/job_135/taskfile.txt.log.8
+...
+```
+
+Each `srun` invoked by GNU `parallel` exeuctes the python `some_funcs.py` script, and passes the data file name and the
+number of clusters parameter we are performing the clustering with.
+
+## GNU `parallel` `--cpu-bind=cores` / CPU cores vs. Intel HyperThread logical CPUs
+
+Some Intel cpu models use a technology called HyperThreading.  On our TLC slurm cluster nodes, we usually have
+8 actual physical cores per node, where each cpu core is an Intel core that supports HyperThreading.  This appears
+to the Linux kernel as two logical cores for each actual physical core.
+
+The logical hyperthreaded cores can increase performance of tasks in some instances.  But often when performing
+a compute bound computational task, the hyperthreading provides no benefit, or can even hurt performance a bit
+because of switching overhead.
+
+The launcher script in this example passes in the `--cpu-bind=cores` to the srun commands, which is usually what
+you probably want to do when working with hyperthreaded core cpus.  If you are trying to parallelize I/O bound
+tasks, sometimes using full hyperthreading can help a bit, since I/O bound tasks will be waiting around more than
+computing, thus having more jobs potentially available to execute can potentially increase performance.  In that
+case you can change to using `--cpu-bind=threads` and set the `--ntasks-per-node=16` to 16 in our typical TLC
+slurm environment, to try and use all logical hyperthreading cores.
+
+You can investigate the difference here using the original `stress-ng` task, which is very much a compute bound
+stress test.  Upping the number of tasks to 500, and then running first with the original settings of
+`--cpu-bind=cores` and `--ntasks-per-node=8`, then running a second time changing these in the launcher script
+to `--cpu-bind=threads` and `--ntasks-per-node=16` gives the following results:
+
+| Model                      | Total Time |
+|----------------------------|------------|
+| 8 cores, no hyperthreading |   3789 sec |
+| 16 hyperthreaded cores     |   3788 sec |
+
+In this example, since the task is embarrassingly parallel, we would expect about a 8x speedup in the
+first case when we have 8 cpus.  So since each task is set to run for 60 seconds, and we have 500
+tasks, we hope to get a time approaching $(500 \times 60) / 8 = 3750 \; \text{sec}$.  Of course
+if we truly had 16 cpus (e.g we could spread this out over 2 nodes), you would expect an embarrassingly parallel task to
+finish in half of that time.
+However, you can see from this run that the performance was the same.  You can get some variation if you rerun
+multiple times.  But on average there shouldn't really be much of a difference between
+hyperthreading and not using it for this task simple computationally bound example task.
 
 
 ## Using GNU `parallel` Across Multiple Nodes
